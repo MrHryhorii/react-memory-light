@@ -1,35 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState} from 'react';
+import './App.css';
+import Card from './Card';
+
+const icons = ["✦", "✴", "❖", "☽", "☀", "✺", "☯", "☾"];
+
+function createDeck() {
+  const base = [...icons, ...icons];
+  const deck = [];
+
+  for (let i = base.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [base[i], base[j]] = [base[j], base[i]];
+  }
+
+  for (let i = 0; i < base.length; i++) {
+    deck.push({
+      key: i,
+      symbol: base[i],
+      isFlipped: false,
+      isMatched: false,
+    });
+  }
+
+  return deck;
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [cards, setCards] = useState(createDeck());
+
+  function handleCardClick(clicked) {
+  // ignore clicks on already flipped or matched cards
+  if (clicked.isFlipped || clicked.isMatched) return;
+
+  // flip the clicked card
+  const updated = cards.map(card => {
+    if (card.key === clicked.key) {
+      return { ...card, isFlipped: true };
+    }
+    return card;
+  });
+
+  setCards(updated);
+}
+
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <h1>Memory Light</h1>
+      <div className="game">
+        {cards.map((card) => (
+          <Card key={card.key} card={card} onSelect={handleCardClick} />
+        ))}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
