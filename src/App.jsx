@@ -27,10 +27,13 @@ function createDeck() {
 
 function App() {
   const [cards, setCards] = useState(createDeck());
+  const [flipped, setFlipped] = useState([]);
 
   function handleCardClick(clicked) {
   // ignore clicks on already flipped or matched cards
   if (clicked.isFlipped || clicked.isMatched) return;
+
+  if (flipped.length === 2) return;
 
   // flip the clicked card
   const updated = cards.map(card => {
@@ -41,7 +44,38 @@ function App() {
   });
 
   setCards(updated);
-}
+
+  // List of flipped cards
+  const newFlipped = [...flipped, clicked];
+  setFlipped([...flipped, clicked]);
+
+    // check if we have two open
+    if (newFlipped.length === 2) {
+      const [a, b] = newFlipped;
+
+      if (a.symbol === b.symbol) {
+        // match found
+        const matched = updated.map(c =>
+          c.key === a.key || c.key === b.key
+            ? { ...c, isMatched: true }
+            : c
+        );
+        setCards(matched);
+        setFlipped([]);
+      } else {
+        // not a match: flip back after delay
+        setTimeout(() => {
+          const reverted = updated.map(c =>
+            c.key === a.key || c.key === b.key
+              ? { ...c, isFlipped: false }
+              : c
+          );
+          setCards(reverted);
+          setFlipped([]);
+        }, 800);
+      }
+    }
+  }
 
 
   return (
